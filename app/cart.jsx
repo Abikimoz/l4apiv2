@@ -11,13 +11,23 @@ const Cart = () => {
   useEffect(() => {
     const initDB = async () => {
       try {
-        const database = await SQLite.openDatabaseAsync('store.db'); // Открываем базу данных асинхронно
+        // Открываем базу данных
+        const database = await SQLite.openDatabaseAsync('store.db');
         setDb(database);
 
+        // Функция для получения товаров из корзины
+        fetchCartItems(database);
+      } catch (error) {
+        console.error("Ошибка при инициализации базы данных на cart:", error);
+      }
+    };
+
+    const fetchCartItems = async (database) => {
+      try {
         // Выполняем запрос для получения товаров из корзины
         const result = await new Promise((resolve, reject) => {
           database.transaction(tx => {
-            tx.execAsync(
+            tx.executeSql(
               "SELECT * FROM cart",
               [],
               (_, result) => {
@@ -38,7 +48,7 @@ const Cart = () => {
           console.log("Результат запроса пустой или структура неожиданная:", result);
         }
       } catch (error) {
-        console.error("Ошибка при инициализации базы данных на cart:", error);
+        console.error("Ошибка при fetching товаров из корзины:", error);
       }
     };
 
