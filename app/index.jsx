@@ -25,7 +25,7 @@ const Home = () => {
             description TEXT
           )
         `);
-
+        console.log("db успешно создана");
         await fetchProducts(); // Получение продуктов после успешной инициализации БД
       } catch (error) {
         console.error("Ошибка при инициализации базы данных на home:", error);
@@ -75,26 +75,24 @@ const Home = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView>
-        <FlatList
-          data={products}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <Text style={styles.title}>{item.title}</Text>
-              <Text>{item.description}</Text>
-              <Text>Цена: ${item.price}</Text>
-              <Button title="Добавить в корзину" onPress={() => addToCart(item)} />
-            </View>
-          )}
-        />
-        <Button title="Перейти в корзину" onPress={() => {
-          router.push("/cart");
-        }} />
-      </SafeAreaView>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <Image source={{ uri: item.image }} style={styles.image} />
+            <Text style={styles.title}>{item.title}</Text>
+            <Text>{item.description}</Text>
+            <Text>Цена: ${item.price}</Text>
+            <Button title="Добавить в корзину" onPress={() => addToCart(item)} />
+          </View>
+        )}
+      />
+      <Button title="Перейти в корзину" onPress={() => {
+        router.push("/cart");
+      }} />
+    </SafeAreaView>
   );
 };
 

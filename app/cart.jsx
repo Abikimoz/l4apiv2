@@ -17,19 +17,25 @@ const Cart = () => {
         // Выполняем запрос для получения товаров из корзины
         const result = await new Promise((resolve, reject) => {
           database.transaction(tx => {
-            tx.executeSql(
+            tx.execAsync(
               "SELECT * FROM cart",
               [],
-              (_, result) => resolve(result), // Успех
-              (_, error) => reject(error) // Ошибка
+              (_, result) => {
+                console.log("Данные получены успешно:", result);
+                resolve(result);
+              }, // Успех
+              (_, error) => {
+                console.error("Ошибка при выполнении SQL:", error);
+                reject(error); // Ошибка
+              }
             );
           });
         });
 
-        if (result.rows) {
+        if (result && result.rows) {
           setCartItems(result.rows._array); // Успешно получаем все товары из корзины
         } else {
-          console.log("Результат запроса пустой или ошибка:", result);
+          console.log("Результат запроса пустой или структура неожиданная:", result);
         }
       } catch (error) {
         console.error("Ошибка при инициализации базы данных на cart:", error);
