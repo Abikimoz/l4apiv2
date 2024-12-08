@@ -8,7 +8,8 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [db, setDb] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter(); // Используем useRouter
+  const [refreshing, setRefreshing] = useState(false); // Состояние для Pull-To-Refresh
+  const router = useRouter();
 
   useEffect(() => {
     const initDB = async () => {
@@ -37,6 +38,7 @@ const Home = () => {
 
   const fetchProducts = async () => {
     try {
+      setRefreshing(true); // Устанавливаем состояние обновления перед загрузкой
       const response = await fetch('https://fakestoreapi.com/products');
       const data = await response.json();
       setProducts(data);
@@ -44,6 +46,7 @@ const Home = () => {
       console.error("Ошибка при получении продуктов:", error);
     } finally {
       setIsLoading(false);
+      setRefreshing(false); // Сбрасываем состояние обновления после загрузки
     }
   };
 
@@ -68,7 +71,7 @@ const Home = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView>
+      <SafeAreaView style={{ flex: 1 }}>
         <Text>Загрузка продуктов...</Text>
       </SafeAreaView>
     );
@@ -88,10 +91,10 @@ const Home = () => {
             <Button title="Добавить в корзину" onPress={() => addToCart(item)} />
           </View>
         )}
+        refreshing={refreshing} // Устанавливаем состояние обновления
+        onRefresh={fetchProducts} // Делаем загрузку при Pull-To-Refresh
       />
-      <Button title="Перейти в корзину" onPress={() => {
-        router.push("/cart");
-      }} />
+      <Button title="Перейти в корзину" onPress={() => router.push("/cart")} style={styles.cartButton} />
     </SafeAreaView>
   );
 };
@@ -102,7 +105,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
-    margin: 10,
+    marginBottom: 10,
     padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
@@ -113,6 +116,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: 'bold',
+  },
+  cartButton: {
+    marginTop: 10, // Добавьте отступ, чтобы не прилипало к краю
   },
 });
 
