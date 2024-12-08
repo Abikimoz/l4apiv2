@@ -1,23 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, Button } from 'react-native';
 import * as SQLite from 'expo-sqlite';
-import { useRouter } from 'expo-router'; // Импортируем useRouter
+import { useRouter } from 'expo-router';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [db, setDb] = useState(null);
-  const router = useRouter(); // Используем useRouter
+  const router = useRouter();
 
   useEffect(() => {
     const initDB = async () => {
       try {
-        const database = await SQLite.openDatabaseAsync('store.db');
+        const database = await SQLite.openDatabaseAsync('store.db'); // Открываем базу данных асинхронно
         setDb(database);
 
-        const result = await database.execAsync("SELECT * FROM cart");
-        setCartItems(result.rows._array); // Получаем все товары из корзины
+        // Выполняем запрос для получения товаров из корзины
+        const result = await new Promise((resolve, reject) => {
+          database.transaction(tx => {
+            tx.executeSql(
+              "SELECT * FROM cart",
+              [],
+              (_, result) => resolve(result), // Успех
+              (_, error) => reject(error) // Ошибка
+            );
+          });
+        });
+
+        if (result.rows) {
+          setCartItems(result.rows._array); // Успешно получаем все товары из корзины
+        } else {
+          console.log("Результат запроса пустой или ошибка:", result);
+        }
       } catch (error) {
-        console.error("Ошибка при инициализации базы данных:", error);
+        console.error("Ошибка при инициализации базы данных на cart:", error);
       }
     };
 
@@ -26,9 +41,8 @@ const Cart = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Корзина</Text>
       {cartItems.length === 0 ? (
-        <Text>Корзина пуста</Text>
+        <Text style={styles.title}>Ваша корзина пуста</Text>
       ) : (
         <FlatList
           data={cartItems}

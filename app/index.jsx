@@ -28,7 +28,7 @@ const Home = () => {
 
         await fetchProducts(); // Получение продуктов после успешной инициализации БД
       } catch (error) {
-        console.error("Ошибка при инициализации базы данных:", error);
+        console.error("Ошибка при инициализации базы данных на home:", error);
       }
     };
 
