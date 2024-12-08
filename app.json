@@ -2,6 +2,7 @@
   "expo": {
     "name": "l4apiv2",
     "slug": "l4apiv2",
+    "scheme": "l4apiv2-scheme",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,6 +24,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-sqlite",
+      "expo-router"
+    ]
   }
 }
