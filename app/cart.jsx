@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, Button } from 'react-native';
+import { StyleSheet, View, Text, FlatList, Button, Alert } from 'react-native';
 import * as SQLite from 'expo-sqlite';
 import { useRouter } from 'expo-router';
 
@@ -15,7 +15,7 @@ const Cart = () => {
         const database = await SQLite.openDatabaseAsync('store.db');
         setDb(database);
 
-        // Функция для получения товаров из корзины
+        // Получаем товары из корзины
         fetchCartItems(database);
       } catch (error) {
         console.error("Ошибка при инициализации базы данных на cart:", error);
@@ -24,36 +24,28 @@ const Cart = () => {
 
     const fetchCartItems = async (database) => {
       try {
-        // Выполняем запрос для получения товаров из корзины
-        const result = await new Promise((resolve, reject) => {
-          database.transaction(tx => {
-            tx.executeSql(
-              "SELECT * FROM cart",
-              [],
-              (_, result) => {
-                console.log("Данные получены успешно:", result);
-                resolve(result);
-              }, // Успех
-              (_, error) => {
-                console.error("Ошибка при выполнении SQL:", error);
-                reject(error); // Ошибка
-              }
-            );
-          });
-        });
-
-        if (result && result.rows) {
-          setCartItems(result.rows._array); // Успешно получаем все товары из корзины
-        } else {
-          console.log("Результат запроса пустой или структура неожиданная:", result);
-        }
+        const result = await database.getAllAsync("SELECT * FROM cart");
+        console.log("Данные получены успешно:", result);
+        setCartItems(result); // Успешно получаем все товары из корзины
       } catch (error) {
-        console.error("Ошибка при fetching товаров из корзины:", error);
+        console.error("Ошибка при выполнении SQL:", error);
       }
     };
 
     initDB();
   }, []);
+
+  // Функция для очистки корзины
+  const clearCart = async () => {
+    try {
+      // Выполняем SQL-запрос для очистки корзины
+      await db.execAsync("DELETE FROM cart");
+      setCartItems([]); // Обновляем состояние, очищая корзину
+      Alert.alert("Корзина очищена"); // Показать уведомление
+    } catch (error) {
+      console.error("Ошибка при очистке корзины:", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -71,7 +63,10 @@ const Cart = () => {
           )}
         />
       )}
-      <Button title="Вернуться назад" onPress={() => router.back()} />
+      <View style={styles.buttonContainer}>
+        <Button title="Очистить корзину" onPress={clearCart} color="red" />
+        <Button title="Вернуться назад" onPress={() => router.back()} />
+      </View>
     </View>
   );
 };
@@ -94,6 +89,9 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontWeight: 'bold',
+  },
+  buttonContainer: {
+    marginTop: 20, // Добавляем отступ между кнопками и списком
   },
 });
 
