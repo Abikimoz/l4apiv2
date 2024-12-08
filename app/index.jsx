@@ -55,7 +55,7 @@ const Home = () => {
       console.error("База данных еще не инициализирована.");
       return;
     }
-
+    console.log("Добавление товара в корзину:", product);
     try {
       await db.withTransactionAsync(async () => {
         await db.execAsync(`
@@ -67,6 +67,8 @@ const Home = () => {
     } catch (error) {
       console.error("Ошибка при добавлении товара в корзину:", error);
     }
+    const cartItems = await db.getAllAsync("SELECT * FROM cart");
+    console.log("Текущие товары в корзине:", cartItems);
   };
 
   if (isLoading) {
