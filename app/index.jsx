@@ -55,10 +55,14 @@ const Home = () => {
       console.error("База данных еще не инициализирована.");
       return;
     }
-    console.log("Добавление товара в корзину:", product);
+    // console.log("Добавление товара в корзину:", product);
+    console.log("Имя товара:", product.title);
+    console.log("Изображение товара:", product.image);
+    console.log("Цена товара:", product.price);
+    console.log("Описание товара:", product.description);
     try {
       await db.withTransactionAsync(async () => {
-        await db.execAsync(`
+        await db.runAsync(`
           INSERT INTO cart (title, image, price, description) 
           VALUES (?, ?, ?, ?)
         `, [product.title, product.image, product.price, product.description]);
@@ -78,6 +82,24 @@ const Home = () => {
       </SafeAreaView>
     );
   }
+
+  const getTableStructure = async (tableName) => {
+    if (!db) {
+      console.error("База данных еще не инициализирована.");
+      return;
+    }
+  
+    try {
+      const result = await db.getAllAsync(`PRAGMA table_info(${tableName})`);
+      console.log(`Структура таблицы ${tableName}:`, result);
+    } catch (error) {
+      console.error("Ошибка при получении структуры таблицы:", error);
+    }
+  };
+  
+  // Вызов функции для таблицы "cart"
+  getTableStructure('cart');
+  
 
   return (
     <SafeAreaView style={styles.container}>
